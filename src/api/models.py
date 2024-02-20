@@ -13,6 +13,11 @@ class Query(BaseModel):
 class HealthResponse(BaseModel):
     message: str
 
+class ReadRootResponse(BaseModel):
+    version: str
+    date: int
+    kubernetes: bool
+
 class ValidateIPRequest(BaseModel):
     ip: str
 

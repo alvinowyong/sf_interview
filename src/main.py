@@ -1,4 +1,5 @@
 import time
+import os
 
 import uvicorn
 from fastapi import FastAPI, HTTPException, Request
@@ -6,7 +7,7 @@ from fastapi.responses import JSONResponse
 from prometheus_fastapi_instrumentator import Instrumentator
 
 from api import v1_router
-from api.models import HealthResponse
+from api.models import HealthResponse, ReadRootResponse
 
 app = FastAPI(
     title="Interview challenge",
@@ -25,15 +26,14 @@ async def http_exception_handler(request: Request, exc: HTTPException):
 Instrumentator().instrument(app).expose(app, endpoint="/metrics")
 
 # Root path
-@app.get("/")
+@app.get("/", response_model=ReadRootResponse)
 async def read_root():
-    version_info = {
-        "version": app.version,
-        "date": int(time.time()),
-        # TODO @alvinowyong: Check KUBERNETES_SERVICE_HOST
-        "kubernetes": False 
-    }
-    return version_info
+    read_result = ReadRootResponse(
+        version=app.version,
+        date=int(time.time()),
+        kubernetes=("KUBERNETES_SERVICE_HOST" in os.environ)
+    )
+    return read_result
 
 # Prometheus health endpoint
 @app.get("/health", response_model=HealthResponse)
