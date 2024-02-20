@@ -15,7 +15,8 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Client Definition for MongoDB
-client = MongoClient("mongodb://localhost:27017/")
+# Credentials login with .env / docker-compose env has been omitted for simplicity of testing
+client = MongoClient("mongodb://mongodb:27017/")
 db = client["interview"]
 collection = db["query"]
 
@@ -23,9 +24,12 @@ v1_router = APIRouter()
 
 @v1_router.get("/history", response_model=List[Query], responses={200: {"description": "OK", "model": List[Query]}, 400: {"model": HTTPError}})
 async def queries_history():
-    documents = collection.find().sort("created_at", DESCENDING).limit(20)
-    query_models = [Query(**doc) for doc in documents]
-    return query_models
+    try:
+        documents = collection.find().sort("created_at", DESCENDING).limit(20)
+        query_models = [Query(**doc) for doc in documents]
+        return query_models
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Bad Request: {e}")
 
 @v1_router.get("/tools/lookup", response_model=Query, responses={200: {"description": "OK", "model": Query}, 400: {"model": HTTPError}, 404: {"model": HTTPError}})
 async def lookup_domain(domain: str, request: Request):
