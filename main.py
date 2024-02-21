@@ -44,4 +44,4 @@ app.include_router(v1_router, prefix="/v1")
 
 if __name__ == "__main__":
     # Default log_level="info" provides access logs for the service
-    uvicorn.run("main:app", host="0.0.0.0", port=3000, log_level="info", reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=3000, log_level="info", reload=False)
